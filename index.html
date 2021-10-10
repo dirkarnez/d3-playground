@@ -1,0 +1,76 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js"></script>
+    <style>
+        :root {
+            --top1-color-group1: rgb(247, 136, 81);
+            --top2-color-group1: rgb(235, 247, 166);
+            --top3-color-group1: rgb(162, 217, 163);
+            --top4-color-group1: rgb(101, 186, 170);
+            --top5-color-group1: rgb(66, 136, 181);
+
+            --top1-color-group2: #88E71C;
+            --top2-color-group2: #17A5D5;
+
+            --card-background-color: #2E2E4B;
+        }
+
+        body {
+            background-color: #1c1e35;
+            color: white;
+        }
+        
+    </style>
+</head>
+<script src="https://d3js.org/d3.v5.min.js"></script>
+<div id="here"></div>
+<script>
+    const COLOR_RANGE = [
+        '--top1-color-group1',
+        '--top2-color-group1',
+        '--top3-color-group1',
+        '--top4-color-group1',
+        '--top5-color-group1'
+    ];
+
+    const w = 200, h = 200, r = 100;
+
+    fetch("https://raw.githubusercontent.com/dirkarnez/d3-playground/main/data.json")
+        .then(response => response.json())
+        .then(json => {
+
+            var vis = d3.select(`#here`)
+                .append("svg:svg")              //create the SVG element inside the <body>
+                .data([json.sort((a, b) => a - b)])                   //associate our data with the document
+                .attr("width", w)           //set the width and height of our visualization (these will be attributes of the <svg> tag
+                .attr("height", h)
+                .append("svg:g")                //make a group to hold our pie chart
+                .attr("transform", "translate(" + r + "," + r + ")")    //move the center of the pie chart from 0, 0 to radius, radius
+
+            var arc = d3.arc()              //this will create <path> elements for us using arc data
+                .innerRadius(r * 0.8)
+                .outerRadius(r);
+
+            var pie = d3.pie()           //this will create arc data for us given a list of values
+                .value(function (d) { return d.count; });    //we must tell it out to access the value of each element in our data array
+
+            var arcs = vis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
+                .data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties) 
+                .enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
+                .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
+                .attr("class", "slice");    //allow us to style things in the slices (like text)
+
+            arcs.append("svg:path")
+                .attr("fill", function (d, i) { return getComputedStyle(document.documentElement).getPropertyValue(COLOR_RANGE[i]); }) //set the color for each slice to be chosen from the color function defined above
+                .attr("d", arc);                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing function
+        });
+</script>
+
+
+<body>
