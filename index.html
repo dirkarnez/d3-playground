@@ -28,7 +28,7 @@
         
     </style>
 </head>
-<script src="https://d3js.org/d3.v5.min.js"></script>
+<script src="https://d3js.org/d3.v7.min.js"></script>
 <div id="here"></div>
 <script>
     const COLOR_RANGE = [
@@ -45,8 +45,8 @@
         .then(response => response.json())
         .then(json => {
 
-            var vis = d3.select(`#here`)
-                .append("svg:svg")              //create the SVG element inside the <body>
+            var svg = d3.select(`#here`)
+                .append("svg:svg")
                 .data([json.sort((a, b) => a - b)])                   //associate our data with the document
                 .attr("width", w)           //set the width and height of our visualization (these will be attributes of the <svg> tag
                 .attr("height", h)
@@ -60,7 +60,7 @@
             var pie = d3.pie()           //this will create arc data for us given a list of values
                 .value(function (d) { return d.count; });    //we must tell it out to access the value of each element in our data array
 
-            var arcs = vis.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
+            var arcs = svg.selectAll("g.slice")     //this selects all <g> elements with class slice (there aren't any yet)
                 .data(pie)                          //associate the generated pie data (an array of arcs, each having startAngle, endAngle and value properties) 
                 .enter()                            //this will create <g> elements for every "extra" data element that should be associated with a selection. The result is creating a <g> for every object in the data array
                 .append("svg:g")                //create a group to hold each slice (we will have a <path> and a <text> element associated with each slice)
@@ -69,6 +69,28 @@
             arcs.append("svg:path")
                 .attr("fill", function (d, i) { return getComputedStyle(document.documentElement).getPropertyValue(COLOR_RANGE[i]); }) //set the color for each slice to be chosen from the color function defined above
                 .attr("d", arc);                                    //this creates the actual SVG path using the associated data (pie) with the arc drawing function
+                
+
+
+
+
+var svgData = svg.node().parentNode.outerHTML;
+var svgBlob = new Blob([svgData], {type:"image/svg+xml;charset=utf-8"});
+var svgUrl = URL.createObjectURL(svgBlob);
+var downloadLink = document.createElement("a");
+downloadLink.href = svgUrl;
+downloadLink.download = "newesttree.svg";
+document.body.appendChild(downloadLink);
+downloadLink.click();
+document.body.removeChild(downloadLink);
+
+
+
+
+
+
+
+
         });
 </script>
 
